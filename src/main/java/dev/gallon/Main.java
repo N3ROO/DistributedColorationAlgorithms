@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         ArrayList<Algorithm> algorithms = new ArrayList<>();
-        algorithms.add(new CycleColoration());
+        algorithms.add(new CycleColoration().build());
 
         new Window(algorithms);
     }
