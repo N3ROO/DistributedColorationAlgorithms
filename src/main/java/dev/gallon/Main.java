@@ -1,12 +1,16 @@
 package dev.gallon;
 
-import io.jbotsim.core.Topology;
-import io.jbotsim.ui.JViewer;
+import dev.gallon.algorithms.Algorithm;
+import dev.gallon.algorithms.CycleColoration;
+import dev.gallon.ui.Window;
+
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
-        Topology tp = new Topology();
-        new JViewer(tp);
-        tp.start();
+        ArrayList<Algorithm> algorithms = new ArrayList<>();
+        algorithms.add(new CycleColoration());
+
+        new Window(algorithms);
     }
 }
