@@ -8,15 +8,30 @@ import java.util.List;
 
 public class CycleColorationNode extends Node {
 
-    private final double x = getID();
-    private double l;
+    private boolean sentDoneMessage = false;
+    private int rounds = 0;
+
+    private Integer x;
+    private Integer y;
+    private Double l1;
+    private Double l2;
+    private List<Node> children;
     private List<Node> parents;
 
     @Override
     public void onStart() {
-        this.l = Math.log(GraphProperties.N);
+        this.x = getID();
+        this.setColor(Color.getIndexedColors().get(this.x));
+
+        this.l1 = Math.ceil(Math.log(GraphProperties.N));
+        this.l2 = this.l1 - 1; // Pour être sûr que l1 != l2
+        this.children = getOutNeighbors();
         this.parents = getInNeighbors();
-        this.setColor(Color.DARK_GRAY);
+
+        if (parents.isEmpty()) {
+            // hmmmm?
+            this.y = Utility.firstFree(getTopology().getNodes(), this);
+        }
     }
 
     @Override
@@ -27,10 +42,26 @@ public class CycleColorationNode extends Node {
         // - récupérer les messages reçus avec getMailBox()
         // - calculer des trucs et préparer les nouveaux messages à envoyés
         // - envoyer les messages aux voisins avec send(Node, Message) ou sendAll(Message)
+        rounds ++;
 
-        List<Message> recvMessages = getMailbox();
+        if (!l1.equals(l2)) {
+            // b
+            for (Node child : children) {
+                send(child, new Message(x));
+            }
 
+            // c - d - e
+            for (Message recvMessage : getMailbox()) {
+                y = (Integer) recvMessage.getContent();
+                x = Utility.posDiff(x, y);
+                l2 = l1;
+                l1 = 1 + Math.ceil(Math.log(l1));
+            }
+        } else if (!sentDoneMessage){
+            sentDoneMessage = true;
+            System.out.println("Node " + getID() + " done! (" + rounds + " rounds)");
+        }
 
-        System.out.println(getID());
+        setColor(Color.getIndexedColors().get(this.x));
     }
 }
