@@ -16,7 +16,6 @@ public class CycleColorationNode extends Node {
     private Double l1;
     private Double l2;
     private List<Node> children;
-    private List<Node> parents;
 
     @Override
     public void onStart() {
@@ -26,10 +25,8 @@ public class CycleColorationNode extends Node {
         this.l1 = Math.ceil(Math.log(GraphProperties.N));
         this.l2 = this.l1 - 1; // Pour être sûr que l1 != l2
         this.children = getOutNeighbors();
-        this.parents = getInNeighbors();
 
-        if (parents.isEmpty()) {
-            // hmmmm?
+        if (hasInNeighbor(this)) {
             this.y = Utility.firstFree(getTopology().getNodes(), this);
         }
     }
@@ -57,11 +54,13 @@ public class CycleColorationNode extends Node {
                 l2 = l1;
                 l1 = 1 + Math.ceil(Math.log(l1));
             }
-        } else if (!sentDoneMessage){
+        } else if (!sentDoneMessage ){
             sentDoneMessage = true;
             System.out.println("Node " + getID() + " done! (" + rounds + " rounds)");
         }
 
-        setColor(Color.getIndexedColors().get(this.x));
+        if (!sentDoneMessage) {
+            setColor(Color.getIndexedColors().get(this.x));
+        }
     }
 }
