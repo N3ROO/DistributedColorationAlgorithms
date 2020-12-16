@@ -11,7 +11,7 @@ public class Algorithm {
     private final String name;
     protected JViewer jviewer;
 
-    public Algorithm(Class<? extends NodeWithProperties> nodeClass, String name) {
+    public Algorithm(Class<? extends Node> nodeClass, String name) {
         this.name = name;
 
         Topology tp = new Topology();
@@ -32,7 +32,8 @@ public class Algorithm {
 
     private void updateGraphVariables() {
         // todo update graph variables
-        NodeWithProperties.DEG_MAX = 0;
+        GraphProperties.DEG_MAX = 0;
+        GraphProperties.N = this.jviewer.getJTopology().getTopology().getNodes().size();
     }
 
     public JTopology getView() {
