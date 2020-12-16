@@ -3,11 +3,12 @@ package dev.gallon.algorithms;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
 import io.jbotsim.ui.JTopology;
+import io.jbotsim.ui.JViewer;
 
 public abstract class Algorithm {
 
     protected Topology tp;
-    protected JTopology jtp;
+    protected JViewer jviewer;
 
     Algorithm(Class<? extends Node> nodeClass) {
         this.tp = new Topology();
@@ -17,12 +18,12 @@ public abstract class Algorithm {
     public abstract void loadGraph(String dot);
 
     public Algorithm build() {
-        this.jtp = new JTopology(tp);
+        this.jviewer = new JViewer(tp, false);
         return this;
     }
 
     public JTopology getView() {
-        return this.jtp;
+        return this.jviewer.getJTopology();
     }
 
     public abstract String toString();
