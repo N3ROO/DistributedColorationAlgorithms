@@ -1,7 +1,7 @@
 package dev.gallon;
 
 import dev.gallon.algorithms.Algorithm;
-import dev.gallon.algorithms.CycleColoration;
+import dev.gallon.algorithms.CycleColorationNode;
 import dev.gallon.ui.Window;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         ArrayList<Algorithm> algorithms = new ArrayList<>();
-        algorithms.add(new CycleColoration().build());
+        algorithms.add(new Algorithm(CycleColorationNode.class, "Coloration de cycle"));
 
         new Window(algorithms);
     }

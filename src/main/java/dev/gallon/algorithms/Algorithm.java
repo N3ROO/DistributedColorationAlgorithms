@@ -2,29 +2,44 @@ package dev.gallon.algorithms;
 
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
+import io.jbotsim.core.event.TopologyListener;
 import io.jbotsim.ui.JTopology;
 import io.jbotsim.ui.JViewer;
 
-public abstract class Algorithm {
+public class Algorithm {
 
-    protected Topology tp;
+    private final String name;
     protected JViewer jviewer;
 
-    Algorithm(Class<? extends Node> nodeClass) {
-        this.tp = new Topology();
-        this.tp.setDefaultNodeModel(nodeClass);
+    public Algorithm(Class<? extends NodeWithProperties> nodeClass, String name) {
+        this.name = name;
+
+        Topology tp = new Topology();
+        tp.setDefaultNodeModel(nodeClass);
+        tp.addTopologyListener(new TopologyListener() {
+            @Override
+            public void onNodeAdded(Node node) {
+                updateGraphVariables();
+            }
+
+            @Override
+            public void onNodeRemoved(Node node) {
+                updateGraphVariables();
+            }
+        });
+        this.jviewer = new JViewer(tp, false);
     }
 
-    public abstract void loadGraph(String dot);
-
-    public Algorithm build() {
-        this.jviewer = new JViewer(tp, false);
-        return this;
+    private void updateGraphVariables() {
+        // todo update graph variables
+        NodeWithProperties.DEG_MAX = 0;
     }
 
     public JTopology getView() {
         return this.jviewer.getJTopology();
     }
 
-    public abstract String toString();
+    public String toString() {
+        return this.name;
+    }
 }

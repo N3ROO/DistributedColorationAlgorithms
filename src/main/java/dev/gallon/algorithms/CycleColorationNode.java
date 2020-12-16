@@ -1,8 +1,6 @@
 package dev.gallon.algorithms;
 
-import io.jbotsim.core.Node;
-
-public class CycleColorationNode extends Node{
+public class CycleColorationNode extends NodeWithProperties {
 
     public static int DMAX;
 
