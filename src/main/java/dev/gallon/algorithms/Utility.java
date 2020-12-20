@@ -1,9 +1,12 @@
 package dev.gallon.algorithms;
 
+import io.jbotsim.core.Color;
 import io.jbotsim.core.Node;
 
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Utility {
 
@@ -35,5 +38,32 @@ public class Utility {
                 .filter((node) -> !node.equals(except))
                 .mapToInt(Node::getID)
                 .collect(BitSet::new, BitSet::set, BitSet::or).nextClearBit(0);
+    }
+
+    /**
+     *
+     * @param nodes the nodes
+     * @param except the node to remove from the node list (null -> ignored)
+     * @param min the min id
+     * @param max the max id
+     * @return the first available id that is not taken by the given nodes in the [min; max] interval. If not fund,
+     * returns -1.
+     */
+    public static int firstFree(List<Node> nodes, Node except, int min, int max) {
+        HashMap<Integer, Boolean> takenMap = new HashMap<>();
+        for (Node node : nodes) {
+            if (node.equals(except)) continue;
+            takenMap.put(node.getID(), true);
+        }
+
+        for (int id = min; id <= max; id++) {
+            if (!takenMap.getOrDefault(id, false)) return id;
+        }
+
+        return -1;
+    }
+
+    public static Color getColorFromInt(int id) {
+        return Color.getIndexedColors().get(id);
     }
 }
