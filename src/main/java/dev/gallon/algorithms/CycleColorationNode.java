@@ -1,6 +1,5 @@
 package dev.gallon.algorithms;
 
-import io.jbotsim.core.Color;
 import io.jbotsim.core.Message;
 import io.jbotsim.core.Node;
 
@@ -20,37 +19,32 @@ public class CycleColorationNode extends Node {
     @Override
     public void onStart() {
         this.x = getID();
-        this.setColor(Color.getIndexedColors().get(this.x));
+        this.setColor(Utility.getColorFromInt(this.x));
 
         this.l1 = Math.ceil(Math.log(GraphProperties.N));
         this.l2 = this.l1 - 1; // Pour être sûr que l1 != l2
         this.children = getOutNeighbors();
 
         if (hasInNeighbor(this)) {
-            this.y = Utility.firstFree(getTopology().getNodes(), this);
+            this.y = Utility.firstFree(getTopology().getNodes(), this, 0, Integer.MAX_VALUE);
         }
     }
 
     @Override
     public void onClock() {
         // Appelée au début de chaque ronde (NewPulse)
-
-        // TODO:
-        // - récupérer les messages reçus avec getMailBox()
-        // - calculer des trucs et préparer les nouveaux messages à envoyés
-        // - envoyer les messages aux voisins avec send(Node, Message) ou sendAll(Message)
         rounds ++;
 
         if (!l1.equals(l2)) {
             // b
             for (Node child : children) {
-                send(child, new Message(x));
+                send(child, new Message(getID()));
             }
 
             // c - d - e
             for (Message recvMessage : getMailbox()) {
                 y = (Integer) recvMessage.getContent();
-                x = Utility.posDiff(x, y);
+                x = Utility.posDiff(getID(), y);
                 l2 = l1;
                 l1 = 1 + Math.ceil(Math.log(l1));
             }
@@ -60,7 +54,8 @@ public class CycleColorationNode extends Node {
         }
 
         if (!sentDoneMessage) {
-            setColor(Color.getIndexedColors().get(this.x));
+            setID(this.x);
+            setColor(Utility.getColorFromInt(this.x));
         }
     }
 }
