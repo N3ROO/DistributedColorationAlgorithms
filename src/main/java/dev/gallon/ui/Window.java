@@ -48,14 +48,14 @@ public class Window extends JFrame {
         );
         this.onAlgorithmChange(0);
 
-        JButton resetAlgorithm = new JButton("Reset");
-        resetAlgorithm.addActionListener((event) -> {
-            getCurrentAlgorithm().reset();
-            updateFooter("Nodes reset. Right click -> \"restart\" to restart the algorithm");
+        JButton clearTopology = new JButton("Clear");
+        clearTopology.addActionListener((event) -> {
+            getCurrentAlgorithm().clear();
+            updateFooter("Topology cleared");
         });
 
         controls.add(algorithmSelector);
-        controls.add(resetAlgorithm);
+        controls.add(clearTopology);
         view.add(currentJTopology);
         footer.add(footerText);
 
@@ -69,7 +69,7 @@ public class Window extends JFrame {
 
     private void onAlgorithmChange(int index) {
         selectedAlgorithm = index;
-        currentJTopology = getCurrentJTopology();
+        currentJTopology.setTopology(getCurrentJTopology().getTopology());
         updateFooter("\"" + getCurrentAlgorithm().toString() + "\"" + " loaded");
     }
 

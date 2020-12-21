@@ -37,14 +37,8 @@ public class Algorithm {
         GraphProperties.N = this.jviewer.getJTopology().getTopology().getNodes().size();
     }
 
-    public void reset() {
-        for (int i = 0; i < jviewer.getJTopology().getTopology().getNodes().size(); i++) {
-            jviewer.getJTopology().getTopology().getNodes().get(i).setID(i);
-            jviewer.getJTopology().getTopology().getNodes().get(i).setColor(Color.DARK_GRAY);
-        }
-        jviewer.getJTopology().getTopology().pause();
-        jviewer.getJTopology().getTopology().resetTime();
-        jviewer.getJTopology().getTopology().clearMessages();
+    public void clear() {
+        jviewer.getJTopology().getTopology().clear();
     }
 
     public JTopology getView() {
