@@ -5,8 +5,8 @@ import io.jbotsim.core.Node;
 
 public class GreedyAlgorithm extends Algorithm {
 
-    public GreedyAlgorithm() {
-        super(Node.class, "Greedy");
+    public GreedyAlgorithm(String name) {
+        super(Node.class, name);
 
         jviewer.getJTopology().getTopology().addStartListener(() -> {
             for (int round = 1; round <= 4; round++) {

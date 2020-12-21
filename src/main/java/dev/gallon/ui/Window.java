@@ -1,6 +1,8 @@
 package dev.gallon.ui;
 
 import dev.gallon.algorithms.Algorithm;
+import io.jbotsim.core.Topology;
+import io.jbotsim.ui.JTopology;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -12,6 +14,8 @@ public class Window extends JFrame {
 
     private final ArrayList<Algorithm> algorithms;
     private final JPanel view;
+    private final JLabel footerText = new JLabel();
+    private JTopology currentAlgorithm = new JTopology(new Topology());
 
     public Window(ArrayList<Algorithm> algorithms) {
         super("Project");
@@ -43,9 +47,10 @@ public class Window extends JFrame {
         algorithmSelector.addActionListener(
                 (event) -> this.onAlgorithmChange(((JComboBox) event.getSource()).getSelectedIndex())
         );
+        this.onAlgorithmChange(0);
         controls.add(algorithmSelector);
-        view.add(this.algorithms.get(0).getView());
-        footer.add(new JLabel("Lilian Gallon"));
+        view.add(currentAlgorithm);
+        footer.add(footerText);
 
         // Display
         this.add(controls, "North");
@@ -56,7 +61,11 @@ public class Window extends JFrame {
     }
 
     private void onAlgorithmChange(int index) {
-        this.view.removeAll();
-        this.view.add(this.algorithms.get(index).getView());
+        this.currentAlgorithm = this.algorithms.get(index).getView();
+        updateFooter(this.algorithms.get(index).toString() + " loaded");
+    }
+
+    private void updateFooter(String text) {
+        this.footerText.setText("Status: " + text);
     }
 }
