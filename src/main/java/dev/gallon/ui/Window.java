@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class Window extends JFrame {
 
     private final ArrayList<Algorithm> algorithms;
-    private final JPanel view;
+    private int selectedAlgorithm = 0;
+    private JTopology currentJTopology = new JTopology(new Topology());
     private final JLabel footerText = new JLabel();
-    private JTopology currentAlgorithm = new JTopology(new Topology());
 
     public Window(ArrayList<Algorithm> algorithms) {
         super("Project");
@@ -25,13 +25,13 @@ public class Window extends JFrame {
         // Configuration
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
-        this.setResizable(false);
+        // this.setResizable(false);
 
         JPanel controls = new JPanel();
         controls.setLayout(new FlowLayout(FlowLayout.LEFT));
         controls.setBorder(new TitledBorder(new EtchedBorder(), "Controls"));
 
-        view = new JPanel();
+        JPanel view = new JPanel();
         view.setBorder(new TitledBorder(new EtchedBorder(), "View"));
 
         JPanel footer = new JPanel();
@@ -42,14 +42,21 @@ public class Window extends JFrame {
         for (int i = 0; i < this.algorithms.size(); i++)
             algorithmsNames[i] = this.algorithms.get(i).toString();
         JComboBox<String> algorithmSelector = new JComboBox<>(algorithmsNames);
-
         //noinspection rawtypes
         algorithmSelector.addActionListener(
                 (event) -> this.onAlgorithmChange(((JComboBox) event.getSource()).getSelectedIndex())
         );
         this.onAlgorithmChange(0);
+
+        JButton resetAlgorithm = new JButton("Reset");
+        resetAlgorithm.addActionListener((event) -> {
+            getCurrentAlgorithm().reset();
+            updateFooter("Nodes reset. Right click -> \"restart\" to restart the algorithm");
+        });
+
         controls.add(algorithmSelector);
-        view.add(currentAlgorithm);
+        controls.add(resetAlgorithm);
+        view.add(currentJTopology);
         footer.add(footerText);
 
         // Display
@@ -61,11 +68,20 @@ public class Window extends JFrame {
     }
 
     private void onAlgorithmChange(int index) {
-        this.currentAlgorithm = this.algorithms.get(index).getView();
-        updateFooter(this.algorithms.get(index).toString() + " loaded");
+        selectedAlgorithm = index;
+        currentJTopology = getCurrentJTopology();
+        updateFooter("\"" + getCurrentAlgorithm().toString() + "\"" + " loaded");
     }
 
     private void updateFooter(String text) {
         this.footerText.setText("Status: " + text);
+    }
+
+    private Algorithm getCurrentAlgorithm() {
+        return this.algorithms.get(this.selectedAlgorithm);
+    }
+
+    private JTopology getCurrentJTopology() {
+        return getCurrentAlgorithm().getView();
     }
 }

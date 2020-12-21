@@ -1,6 +1,5 @@
 package dev.gallon.algorithms;
 
-import io.jbotsim.core.Color;
 import io.jbotsim.core.Node;
 
 public class GreedyAlgorithm extends Algorithm {
