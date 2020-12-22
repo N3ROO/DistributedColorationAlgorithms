@@ -3,10 +3,7 @@ package dev.gallon.algorithms;
 import io.jbotsim.core.Color;
 import io.jbotsim.core.Node;
 
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Utility {
 
@@ -26,6 +23,10 @@ public class Utility {
     public static int posDiff(int x, int y) {
         int p = ffs(x^y) - 1;
         return (p<<1) | ((x>>p) & 1);
+    }
+
+    public static int firstFree(Node... nodes) {
+        return firstFree(Arrays.asList(nodes.clone()), null, 0, Integer.MAX_VALUE);
     }
 
     /**
