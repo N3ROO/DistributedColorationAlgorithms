@@ -26,38 +26,24 @@ public class Utility {
     }
 
     public static int firstFree(Node... nodes) {
-        return firstFree(Arrays.asList(nodes.clone()), null, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * @param nodes
-     * @param except a node to remove (null to ignore)
-     * @return the first free ID in the current topology
-     */
-    public static int firstFree(List<Node> nodes, Node except) {
-        return nodes.stream()
-                .filter((node) -> !node.equals(except))
-                .mapToInt(Node::getID)
-                .collect(BitSet::new, BitSet::set, BitSet::or).nextClearBit(0);
+        return firstFree(Arrays.asList(nodes.clone()), null);
     }
 
     /**
      *
      * @param nodes the nodes
      * @param except the node to remove from the node list (null -> ignored)
-     * @param min the min id
-     * @param max the max id
      * @return the first available id that is not taken by the given nodes in the [min; max] interval. If not fund,
      * returns -1.
      */
-    public static int firstFree(List<Node> nodes, Node except, int min, int max) {
+    public static int firstFree(List<Node> nodes, Node except) {
         HashMap<Integer, Boolean> takenMap = new HashMap<>();
         for (Node node : nodes) {
             if (node.equals(except)) continue;
-            takenMap.put(node.getID(), true);
+            takenMap.put(Utility.getIntFromColor(node.getColor()), true);
         }
 
-        for (int id = min; id <= max; id++) {
+        for (int id = 0; id < Integer.MAX_VALUE; id++) {
             if (!takenMap.getOrDefault(id, false)) return id;
         }
 
@@ -66,5 +52,9 @@ public class Utility {
 
     public static Color getColorFromInt(int id) {
         return Color.getIndexedColors().get(id);
+    }
+
+    public static int getIntFromColor(Color c) {
+        return Color.getIndexedColors().indexOf(c);
     }
 }

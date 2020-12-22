@@ -48,7 +48,7 @@ public class CycleColorationNode extends Node {
                 l = Math.ceil(Math.log(GraphProperties.N));
                 // 2.
                 if (father == null)
-                    y = Utility.firstFree(getNeighbors(), this, 0, Integer.MAX_VALUE);
+                    y = Utility.firstFree(getNeighbors(), this);
                 else
                     y = -1;
 
@@ -105,7 +105,25 @@ public class CycleColorationNode extends Node {
                 }
                 break;
             case FIX:
-                // TODO: fix coloration
+                for (Node node : getNeighbors()) {
+                    send(node, new Message(x));
+                }
+
+                boolean done = false;
+
+                for (Message m : getMailbox()) {
+                    if ((int) m.getContent() == x && m.getSender().getID() < getID()) {
+                        x = Utility.firstFree(getNeighbors(), this);
+                        updateColor();
+                    }
+                    done = true;
+                }
+
+                if (done) {
+                    log("Finished algorithm, round #" + round);
+                    status = STATUS.DONE;
+                }
+
                 break;
             case DONE:
                 break;
