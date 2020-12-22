@@ -23,16 +23,18 @@ public class CycleColorationNode extends Node {
 
     @Override
     public void onStart() {
-        round = 0;
-        x = getID();
-        noMsgLastRound = false;
         status = STATUS.INIT;
+        round = 0;
+        noMsgLastRound = false;
+        getMailbox().clear();
+        x = getID();
         updateColor();
     }
 
     @Override
     public void onClock() {
-        round ++;
+        if (status != STATUS.DONE)
+            round ++;
 
         switch (status) {
             case INIT:
