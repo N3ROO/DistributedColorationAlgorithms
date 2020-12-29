@@ -11,6 +11,16 @@ public class CycleColorationNode extends Node {
         INIT, COLOR, FIX, DONE
     }
 
+    class ColorMsg {
+        public STATUS status;
+        public int color;
+
+        public ColorMsg(STATUS status, int color) {
+            this.status = status;
+            this.color = color;
+        }
+    }
+
     private STATUS status;
     private Node father;
     private List<Node> children;
@@ -18,17 +28,20 @@ public class CycleColorationNode extends Node {
     private int round;
     private int x;
     private double l;
-    private int y;
+    private Integer y;
+    private int recvMsgCount;
     private boolean noMsgLastRound;
 
     @Override
     public void onStart() {
         status = STATUS.INIT;
         round = 0;
-        noMsgLastRound = false;
         getMailbox().clear();
         x = getID();
+        y = null;
         updateColor();
+        recvMsgCount = 0;
+        noMsgLastRound = false;
     }
 
     @Override
@@ -51,8 +64,6 @@ public class CycleColorationNode extends Node {
                 // 2.
                 if (father == null)
                     y = Utility.firstFree(getNeighbors(), this);
-                else
-                    y = -1;
 
                 log("Finished init round #" + round);
                 status = STATUS.COLOR;
@@ -62,66 +73,66 @@ public class CycleColorationNode extends Node {
 
                 // 3/a ok
                 // b:
-                for (Node child : children)
-                    send(child, new Message(x));
+                if (!noMsgLastRound)
+                    for (Node child : children)
+                        send(child, new Message(new ColorMsg(STATUS.COLOR, x)));
 
                 // c:
                 if (father != null) {
                     for (Message m : getMailbox()) {
+                        ColorMsg content = (ColorMsg) m.getContent();
+                        if (content.status != STATUS.COLOR) continue;
                         if (m.getSender() == father) {
-                            y = (int) m.getContent();
+                            y = content.color;
                             break;
                         }
                     }
-
-
-                    if (y == -1) {
-                        // We are here because the node could not find the message sent by its father
-                        // It may happen at the beginning. But if it happens two times in a row, it means
-                        // that the father finished its work, and won't send any message anymore, so we
-                        // tell to the node to stop (since it won't receive any more messages)
-
-                        if (noMsgLastRound) {
-                            log("Finished color6 (no msg) round #" + round);
-                            status = STATUS.FIX;
-                        }
-
-                        noMsgLastRound = true;
-                    } else {
-                        noMsgLastRound = false;
-
-                        // d:
-                        x = Utility.posDiff(x, y);
-                        updateColor();
-
-                        // e:
-                        double lastL = l;
-                        l = 1 + Math.ceil(Math.log(l));
-
-                        // jusqu'à ce que l = l'
-                        if (l == lastL) {
-                            log("Finished color6 (properly) round #" + round);
-                            status = STATUS.FIX;
-                        }
-                    }
                 }
+
+                // d:
+                if (y == null) {
+                    if (noMsgLastRound) {
+                        // Cas u <--> v (pere u c'est v et vice versa)
+                        status = STATUS.FIX;
+                        x = 0;
+                        updateColor();
+                        log("attend");
+                    }
+                    noMsgLastRound = true;
+                    break;
+                } else {
+                    noMsgLastRound = false;
+                    x = Utility.posDiff(x, y);
+                    updateColor();
+                }
+
+                // e:
+                double lastL = l;
+                l = 1 + Math.ceil(Math.log(l));
+
+                // jusqu'à ce que l = l'
+                if (l == lastL) {
+                    log("Finished color6 round #" + round);
+                    status = STATUS.FIX;
+                }
+
                 break;
             case FIX:
                 for (Node node : getNeighbors()) {
-                    send(node, new Message(x));
+                    send(node, new Message(new ColorMsg(STATUS.FIX, x)));
                 }
 
-                boolean done = false;
-
                 for (Message m : getMailbox()) {
-                    if ((int) m.getContent() == x && m.getSender().getID() < getID()) {
+                    ColorMsg content = (ColorMsg) m.getContent();
+                    if (content.status != STATUS.FIX) continue;
+                    if (content.color == x && m.getSender().getID() < getID()) {
                         x = Utility.firstFree(getNeighbors(), this);
                         updateColor();
                     }
-                    done = true;
+                    recvMsgCount++;
                 }
 
-                if (done) {
+                if (recvMsgCount == getNeighbors().size()) {
                     log("Finished algorithm, round #" + round);
                     status = STATUS.DONE;
                 }

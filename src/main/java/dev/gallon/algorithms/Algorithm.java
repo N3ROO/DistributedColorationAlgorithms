@@ -29,6 +29,7 @@ public class Algorithm {
             }
         });
         this.jviewer = new JViewer(tp, false);
+        this.jviewer.getJTopology().getTopology().setTimeUnit(1000);
     }
 
     private void updateGraphVariables() {
