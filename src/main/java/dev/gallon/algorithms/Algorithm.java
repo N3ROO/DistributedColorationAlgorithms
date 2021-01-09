@@ -1,11 +1,14 @@
 package dev.gallon.algorithms;
 
-import io.jbotsim.core.Color;
+import io.jbotsim.core.Link;
 import io.jbotsim.core.Node;
 import io.jbotsim.core.Topology;
+import io.jbotsim.core.event.ConnectivityListener;
 import io.jbotsim.core.event.TopologyListener;
 import io.jbotsim.ui.JTopology;
 import io.jbotsim.ui.JViewer;
+
+import java.util.Comparator;
 
 public class Algorithm {
 
@@ -28,13 +31,23 @@ public class Algorithm {
                 updateGraphVariables();
             }
         });
+        tp.addConnectivityListener(new ConnectivityListener() {
+            @Override
+            public void onLinkAdded(Link link) {
+                updateGraphVariables();
+            }
+
+            @Override
+            public void onLinkRemoved(Link link) {
+                updateGraphVariables();
+            }
+        });
         this.jviewer = new JViewer(tp, false);
         this.jviewer.getJTopology().getTopology().setTimeUnit(1000);
     }
 
     private void updateGraphVariables() {
-        // todo update graph variables
-        GraphProperties.DEG_MAX = 0;
+        GraphProperties.DEG_MAX = this.jviewer.getJTopology().getTopology().getNodes().stream().max(Comparator.comparingInt(n -> n.getNeighbors().size())).get().getNeighbors().size();
         GraphProperties.N = this.jviewer.getJTopology().getTopology().getNodes().size();
     }
 
