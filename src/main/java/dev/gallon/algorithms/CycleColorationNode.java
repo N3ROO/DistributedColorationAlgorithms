@@ -21,99 +21,116 @@ public class CycleColorationNode extends Node {
         }
     }
 
-    private STATUS status;
-    private Node father;
-    private List<Node> children;
+    // algo
+    class AlgoData {
+        protected STATUS status;
+        private Node father;
+        private List<Node> children;
+        private double l;
+        private int recvMsgCount;
+        private boolean noMsgLastRound;
+        private Integer y;
+        private int round;
 
-    private int round;
-    private int x;
-    private double l;
-    private Integer y;
-    private int recvMsgCount;
-    private boolean noMsgLastRound;
+        public AlgoData init() {
+            status = STATUS.INIT;
+            getMailbox().clear();
+            y = null;
+            updateColor();
+            recvMsgCount = 0;
+            noMsgLastRound = false;
+            round = 0;
+            return this;
+        }
+    }
+
+    AlgoData data;
+    protected int x;
 
     @Override
     public void onStart() {
-        status = STATUS.INIT;
-        round = 0;
-        getMailbox().clear();
+        data = new AlgoData().init();
         x = getID();
-        y = null;
-        updateColor();
-        recvMsgCount = 0;
-        noMsgLastRound = false;
     }
 
-    @Override
-    public void onClock() {
-        if (status != STATUS.DONE)
-            round ++;
+    protected void coloration(int k, AlgoData data) {
+        if (data.status != STATUS.DONE)
+            data.round ++;
 
-        switch (status) {
+        switch (data.status) {
             case INIT:
                 // On créé une 1-orientation
-                father = getNeighbors().size() > 0 ? getNeighbors().get(0) : null;
-                if (father != null) log("Father: " + father.getID());
-                children = getNeighbors();
-                children.remove(father);
+                if (getNeighbors().size() > 0) {
+                    if (getNeighbors().size() <= k) {
+                        data.father = getNeighbors().get(0);
+                    } else {
+                        data.father = getNeighbors().get(k-1);
+                    }
+                } else {
+                    data.father = null;
+                }
+
+                if (data.father != null) log("Father: " + data.father.getID());
+                data.children = getNeighbors();
+                data.children.remove(data.father);
 
                 // Début algo color6
                 // 1.
                 updateColor();
-                l = Math.ceil(Math.log(GraphProperties.N));
+                data.l = Math.ceil(Math.log(GraphProperties.N));
                 // 2.
-                if (father == null)
-                    y = Utility.firstFree(getNeighbors(), this);
+                if (data.father == null)
+                    data.y = Utility.firstFree(getNeighbors(), this);
 
-                log("Finished init round #" + round);
-                status = STATUS.COLOR;
+                log("Finished init round #" + data.round + " k=" + k);
+                data.status = STATUS.COLOR;
                 break;
             case COLOR:
                 // Suite algo color 6
 
                 // 3/a ok
                 // b:
-                if (!noMsgLastRound)
-                    for (Node child : children)
+                if (!data.noMsgLastRound)
+                    for (Node child : data.children)
                         send(child, new Message(new ColorMsg(STATUS.COLOR, x)));
 
                 // c:
-                if (father != null) {
+                if (data.father != null) {
                     for (Message m : getMailbox()) {
                         ColorMsg content = (ColorMsg) m.getContent();
                         if (content.status != STATUS.COLOR) continue;
-                        if (m.getSender() == father) {
-                            y = content.color;
+                        if (m.getSender() == data.father) {
+                            data.y = content.color;
                             break;
                         }
                     }
                 }
 
                 // d:
-                if (y == null) {
-                    if (noMsgLastRound) {
+                if (data.y == null) {
+                    if (data.noMsgLastRound) {
                         // Cas u <--> v (pere u c'est v et vice versa)
-                        status = STATUS.FIX;
+                        data.status = STATUS.FIX;
                         x = 0;
                         updateColor();
                         log("attend");
                     }
-                    noMsgLastRound = true;
+                    data.noMsgLastRound = true;
                     break;
                 } else {
-                    noMsgLastRound = false;
-                    x = Utility.posDiff(x, y);
+                    data.noMsgLastRound = false;
+                    x = Utility.posDiff(x, data.y);
                     updateColor();
                 }
 
                 // e:
-                double lastL = l;
-                l = 1 + Math.ceil(Math.log(l));
+                double lastL = data.l;
+                data.l = 1 + Math.ceil(Math.log(data.l));
 
                 // jusqu'à ce que l = l'
-                if (l == lastL) {
-                    log("Finished color6 round #" + round);
-                    status = STATUS.FIX;
+                if (data.l == lastL) {
+                    log("Finished color6 round #" + data.round + " k=" + k);
+                    data.status = STATUS.FIX;
                 }
 
                 break;
@@ -129,25 +146,29 @@ public class CycleColorationNode extends Node {
                         x = Utility.firstFree(getNeighbors(), this);
                         updateColor();
                     }
-                    recvMsgCount++;
+                    data.recvMsgCount++;
                 }
 
-                if (recvMsgCount == getNeighbors().size()) {
-                    log("Finished algorithm, round #" + round);
-                    status = STATUS.DONE;
+                if (data.recvMsgCount >= getNeighbors().size()) {
+                    log("Finished algorithm, round #" + data.round + " k=" + k);
+                    data.status = STATUS.DONE;
                 }
-
                 break;
             case DONE:
                 break;
         }
     }
 
-    private void updateColor() {
+    @Override
+    public void onClock() {
+        coloration(1, data);
+    }
+
+    protected void updateColor() {
         setColor(Utility.getColorFromInt(x));
     }
 
-    private void log(String msg) {
+    protected void log(String msg) {
         System.out.println("Node " + getID() + ": " + msg);
     }
 }

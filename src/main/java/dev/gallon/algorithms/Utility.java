@@ -7,6 +7,15 @@ import java.util.*;
 
 public class Utility {
 
+    static final List<Color> colors;
+
+    static {
+        colors = new ArrayList<>();
+        colors.addAll(Color.getIndexedColors());
+        colors.addAll(Color.getIndexedColors());
+        colors.addAll(Color.getIndexedColors());
+    }
+
     /**
      * @param x the int value (decimal format)
      * @return the first bit set position
@@ -51,10 +60,14 @@ public class Utility {
     }
 
     public static Color getColorFromInt(int id) {
-        return Color.getIndexedColors().get(id);
+        return getIndexedColors().get(id);
+    }
+
+    public static List<Color> getIndexedColors() {
+        return colors;
     }
 
     public static int getIntFromColor(Color c) {
-        return Color.getIndexedColors().indexOf(c);
+        return getIndexedColors().indexOf(c);
     }
 }
